@@ -1,0 +1,362 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GlowChem</title>
+<style>
+  :root{
+    --bg:#f6f4ef; --card:#ffffff; --ink:#1d2b2a; --muted:#66756f; --line:#e4e0d6;
+    --brand:#0f7b6c; --brand-d:#0a5a4f; --good:#2e9e6b; --warn:#d98a1c; --bad:#c8432f;
+    --good-bg:#e5f5ec; --warn-bg:#fdf1dc; --bad-bg:#fbe6e1;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+  header{padding:28px 20px 8px;max-width:960px;margin:0 auto}
+  .logo{font-size:28px;font-weight:800;letter-spacing:-.5px}
+  .logo span{color:var(--brand)}
+  .tag{color:var(--muted);margin-top:4px}
+  nav{max-width:960px;margin:16px auto 0;padding:0 20px;display:flex;gap:8px;flex-wrap:wrap}
+  nav button{border:1px solid var(--line);background:#fff;padding:10px 18px;border-radius:999px;font:inherit;font-weight:600;color:var(--muted);cursor:pointer}
+  nav button.on{background:var(--brand);border-color:var(--brand);color:#fff}
+  main{max-width:960px;margin:18px auto 60px;padding:0 20px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:22px;margin-bottom:18px}
+  h2{margin:0 0 6px;font-size:20px}
+  p.sub{margin:0 0 16px;color:var(--muted)}
+  .row{display:flex;gap:20px;flex-wrap:wrap}
+  .col{flex:1 1 300px;min-width:0}
+  .drop{border:2px dashed var(--line);border-radius:14px;padding:18px;text-align:center;background:#fbfaf7}
+  .drop img,.drop video{max-width:100%;max-height:340px;border-radius:12px;display:block;margin:0 auto 12px}
+  button.btn{background:var(--brand);color:#fff;border:0;border-radius:12px;padding:12px 20px;font:inherit;font-weight:700;cursor:pointer}
+  button.btn:hover{background:var(--brand-d)}
+  button.btn:disabled{opacity:.5;cursor:not-allowed}
+  button.ghost{background:#fff;color:var(--brand);border:1px solid var(--brand)}
+  .btns{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+  .tips{font-size:14px;color:var(--muted);margin:12px 0 0;padding-left:18px;text-align:left}
+  .hidden{display:none!important}
+  .err{background:var(--bad-bg);color:var(--bad);border-radius:12px;padding:12px 14px;margin-top:12px;font-weight:600}
+  .note{background:var(--warn-bg);color:#7a4d06;border-radius:12px;padding:10px 14px;margin-bottom:14px;font-size:14px}
+  .spin{display:inline-block;width:16px;height:16px;border:3px solid #ffffff55;border-top-color:#fff;border-radius:50%;animation:s 1s linear infinite;vertical-align:-3px;margin-right:8px}
+  @keyframes s{to{transform:rotate(360deg)}}
+  .hero{display:flex;gap:22px;align-items:center;flex-wrap:wrap;margin-bottom:10px}
+  .ring{width:120px;height:120px;border-radius:50%;display:grid;place-items:center;flex:none}
+  .ring div{width:92px;height:92px;border-radius:50%;background:#fff;display:grid;place-items:center;font-size:30px;font-weight:800}
+  .ring small{display:block;font-size:11px;font-weight:600;color:var(--muted);text-align:center;margin-top:-6px}
+  .bar{margin:12px 0}
+  .bar .top{display:flex;justify-content:space-between;font-weight:600;font-size:15px}
+  .bar .track{height:10px;border-radius:8px;background:#ece9e0;margin-top:5px;overflow:hidden}
+  .bar .fill{height:100%;border-radius:8px}
+  .lbl{font-size:12px;font-weight:700;padding:2px 9px;border-radius:999px}
+  .good{background:var(--good-bg);color:var(--good)} .warn{background:var(--warn-bg);color:var(--warn)} .bad{background:var(--bad-bg);color:var(--bad)}
+  .masks{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:10px;margin-top:10px}
+  .masks figure{margin:0;font-size:12px;color:var(--muted);text-align:center}
+  .masks img{width:100%;border-radius:10px;display:block}
+  .chips{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 14px}
+  .chip{border:1px solid var(--line);background:#fff;border-radius:999px;padding:8px 14px;font:inherit;font-size:14px;font-weight:600;cursor:pointer;color:var(--muted)}
+  .chip.on{background:var(--brand);color:#fff;border-color:var(--brand)}
+  textarea{width:100%;min-height:150px;border:1px solid var(--line);border-radius:12px;padding:12px;font:inherit;resize:vertical}
+  .verdict{border-radius:14px;padding:16px 18px;margin:16px 0 10px;font-weight:800;font-size:18px}
+  .verdict small{display:block;font-weight:500;font-size:14px;margin-top:4px}
+  .ing{border:1px solid var(--line);border-left-width:6px;border-radius:12px;padding:12px 14px;margin:10px 0}
+  .ing.avoid{border-left-color:var(--bad)} .ing.caution{border-left-color:var(--warn)} .ing.low{border-left-color:#b9b27a}
+  .ing b{font-size:16px}
+  .ing .why{color:var(--muted);font-size:14px;margin-top:2px}
+  .ing .you{font-size:14px;margin-top:6px;font-weight:600}
+  .mini{font-size:12px;color:var(--muted)}
+  footer{max-width:960px;margin:0 auto 40px;padding:0 20px;color:var(--muted);font-size:13px}
+  ul.clean{margin:8px 0 0;padding-left:20px}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">Glow<span>Chem</span></div>
+  <div class="tag">See what your skin needs, then check what's in your products.</div>
+</header>
+<nav>
+  <button data-tab="scan" class="on">1. Skin Scan</button>
+  <button data-tab="irritant">2. Irritant Watch</button>
+  <button data-tab="about">About</button>
+</nav>
+<main>
+
+<!-- ============ SKIN SCAN ============ -->
+<section id="tab-scan">
+  <div id="demoNote" class="note hidden">Demo mode is on: the numbers below are sample data, not a real scan.</div>
+  <div class="card">
+    <h2>AI skin scan</h2>
+    <p class="sub">Upload or take a front-facing selfie. Powered by the YouCam AI Skin Analysis API.</p>
+    <div class="row">
+      <div class="col">
+        <div class="drop">
+          <img id="preview" class="hidden" alt="Your selfie preview">
+          <video id="cam" class="hidden" playsinline muted></video>
+          <div class="btns">
+            <button class="btn ghost" id="pickBtn">Choose photo</button>
+            <button class="btn ghost" id="camBtn">Use webcam</button>
+            <button class="btn ghost hidden" id="snapBtn">Take photo</button>
+          </div>
+          <input type="file" id="file" accept="image/jpeg,image/png,image/*" class="hidden">
+          <ul class="tips">
+            <li>Face the camera, mouth closed, forehead visible.</li>
+            <li>Bright, even light. No heavy makeup.</li>
+            <li>Your face should fill about 60-80% of the photo width.</li>
+          </ul>
+        </div>
+        <div style="margin-top:14px"><button class="btn" id="goBtn" disabled>Analyze my skin</button></div>
+        <div id="scanErr" class="err hidden"></div>
+      </div>
+      <div class="col" id="results" style="display:none">
+        <div class="hero">
+          <div class="ring" id="ring"><div id="overall">--</div></div>
+          <div>
+            <div style="font-weight:800;font-size:18px">Overall skin score</div>
+            <div class="mini" id="ageLine"></div>
+            <div class="mini">Higher is healthier.</div>
+          </div>
+        </div>
+        <div id="bars"></div>
+        <div id="masksWrap" class="hidden"><div style="font-weight:700;margin-top:14px">Where the AI looked</div><div class="masks" id="masks"></div></div>
+        <div style="margin-top:16px"><button class="btn" id="toIrritant">Check my products against this skin &rarr;</button></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ IRRITANT WATCH ============ -->
+<section id="tab-irritant" class="hidden">
+  <div class="card">
+    <h2>Irritant Watch</h2>
+    <p class="sub">Paste a product's ingredient list (INCI). GlowChem flags irritants, allergens and pore-cloggers, and weighs each one against <b>your</b> skin.</p>
+
+    <div style="font-weight:700">Your skin profile <span class="mini" id="profSrc"></span></div>
+    <div class="chips" id="chips">
+      <button class="chip" data-p="sens">Sensitive / redness-prone</button>
+      <button class="chip" data-p="dry">Dry / dehydrated</button>
+      <button class="chip" data-p="acne">Acne-prone / clogged pores</button>
+    </div>
+
+    <textarea id="inci" placeholder="Water, Glycerin, Alcohol Denat., Parfum, Limonene, Sodium Lauryl Sulfate, Retinol, ..."></textarea>
+    <div class="btns" style="justify-content:flex-start;margin-top:12px">
+      <button class="btn" id="checkBtn">Check ingredients</button>
+      <button class="btn ghost" id="sampleBtn">Try a sample product</button>
+    </div>
+    <div id="irrOut"></div>
+  </div>
+</section>
+
+<!-- ============ ABOUT ============ -->
+<section id="tab-about" class="hidden">
+  <div class="card">
+    <h2>Why GlowChem?</h2>
+    <p>Most people buy skincare by hype. Ingredient lists are written in chemical names, and what irritates one face is harmless on another. A sensitive, redness-prone face and an oily, acne-prone face should read the same label very differently.</p>
+    <p><b>Step 1 &ndash; Scan.</b> The YouCam AI Skin Analysis API scores redness, moisture, oiliness, acne, pores, texture, radiance and wrinkles from one selfie.</p>
+    <p><b>Step 2 &ndash; Irritant Watch.</b> Your scan automatically sets your skin profile. Each ingredient in a product is checked against a chemistry-based irritant and comedogen database, weighted by how early it appears in the list (a rough guide to concentration) and by how relevant it is to your skin.</p>
+    <p><b>For shoppers and retailers:</b> fewer returns and bad reactions, and a clear, explained reason behind every "good for you / not for you" recommendation.</p>
+    <p class="mini">GlowChem gives cosmetic guidance, not medical advice. If you have a skin condition, a reaction, or a known allergy, talk to a dermatologist or pharmacist. Ingredient flags are general: concentration and formulation matter, and patch-testing a new product is always sensible.</p>
+  </div>
+</section>
+</main>
+<footer>Skin analysis by the YouCam API (Perfect Corp.). Built for the YouCam API Skin AI &amp; eCommerce VTO Hackathon.</footer>
+
+<script>
+/* ---------------- tabs ---------------- */
+const $ = (id) => document.getElementById(id);
+function showTab(t){
+  for (const s of ['scan','irritant','about']) $('tab-'+s).classList.toggle('hidden', s!==t);
+  document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on', b.dataset.tab===t));
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>showTab(b.dataset.tab));
+
+/* ---------------- photo capture ---------------- */
+let photoData = null, stream = null;
+const preview=$('preview'), cam=$('cam');
+
+$('pickBtn').onclick = () => $('file').click();
+$('file').onchange = (e) => { const f=e.target.files[0]; if(f) loadFile(f); };
+
+function stopCam(){ if(stream){ stream.getTracks().forEach(t=>t.stop()); stream=null; } cam.classList.add('hidden'); $('snapBtn').classList.add('hidden'); }
+
+$('camBtn').onclick = async () => {
+  try{
+    stream = await navigator.mediaDevices.getUserMedia({video:{facingMode:'user',width:{ideal:1280},height:{ideal:960}}});
+    cam.srcObject = stream; await cam.play();
+    cam.classList.remove('hidden'); preview.classList.add('hidden'); $('snapBtn').classList.remove('hidden');
+  }catch(e){ showErr('Could not open the webcam. Allow camera access, or use "Choose photo" instead.'); }
+};
+$('snapBtn').onclick = () => {
+  const c=document.createElement('canvas'); c.width=cam.videoWidth; c.height=cam.videoHeight;
+  c.getContext('2d').drawImage(cam,0,0);
+  stopCam(); setPhoto(c);
+};
+
+function loadFile(f){
+  const img=new Image();
+  img.onload=()=>{ URL.revokeObjectURL(img.src); setPhoto(img); };
+  img.onerror=()=>showErr('Could not read that image. Use a JPG or PNG.');
+  img.src=URL.createObjectURL(f);
+}
+
+// Resize so the long side <= 1600px (keeps upload small) and make a JPEG.
+function setPhoto(src){
+  const w=src.naturalWidth||src.width, h=src.naturalHeight||src.height;
+  if(Math.min(w,h)<480){ showErr('That photo is too small. The shorter side must be at least 480 pixels.'); return; }
+  const k=Math.min(1,1600/Math.max(w,h));
+  const c=document.createElement('canvas'); c.width=Math.round(w*k); c.height=Math.round(h*k);
+  c.getContext('2d').drawImage(src,0,0,c.width,c.height);
+  photoData=c.toDataURL('image/jpeg',0.9);
+  preview.src=photoData; preview.classList.remove('hidden');
+  $('goBtn').disabled=false; hideErr();
+}
+function showErr(m){ const e=$('scanErr'); e.textContent=m; e.classList.remove('hidden'); }
+function hideErr(){ $('scanErr').classList.add('hidden'); }
+
+/* ---------------- scan ---------------- */
+const NAMES = {redness:'Redness',moisture:'Moisture',oiliness:'Oil balance',acne:'Acne / blemishes',pore:'Pores',texture:'Texture',radiance:'Radiance',wrinkle:'Wrinkles'};
+const ORDER = ['redness','moisture','oiliness','acne','pore','texture','radiance','wrinkle'];
+function level(s){ return s>=80?['Great','good','var(--good)']:s>=65?['Watch','warn','var(--warn)']:['Needs care','bad','var(--bad)']; }
+
+$('goBtn').onclick = async () => {
+  hideErr(); const b=$('goBtn'); b.disabled=true; b.innerHTML='<span class="spin"></span>Analyzing (about 10-30 seconds)...';
+  try{
+    const r = await fetch('/api/analyze',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({image:photoData})});
+    const j = await r.json();
+    if(!r.ok) throw new Error(j.error||'Something went wrong.');
+    renderScan(j);
+    try{ localStorage.setItem('glowchem_scan', JSON.stringify(j)); }catch(e){}
+    applyProfileFromScan(j);
+  }catch(e){ showErr(e.message); }
+  b.disabled=false; b.textContent='Analyze my skin again';
+};
+
+function renderScan(j){
+  $('results').style.display='block';
+  const o = Math.round(j.overall ?? avg(j));
+  const [, , col] = level(o);
+  $('ring').style.background=`conic-gradient(${col} ${o*3.6}deg,#ece9e0 0)`;
+  $('overall').textContent=o;
+  $('ageLine').textContent = j.skinAge ? 'AI-estimated skin age: '+j.skinAge : '';
+  $('bars').innerHTML = ORDER.filter(k=>j.scores[k]).map(k=>{
+    const s=Math.round(j.scores[k].ui), [t,cls,c]=level(s);
+    return `<div class="bar"><div class="top"><span>${NAMES[k]}</span><span>${s} <span class="lbl ${cls}">${t}</span></span></div><div class="track"><div class="fill" style="width:${s}%;background:${c}"></div></div></div>`;
+  }).join('');
+  const masks = ORDER.flatMap(k=>(j.scores[k]?.masks||[]).slice(0,1).map(u=>({k,u})));
+  $('masksWrap').classList.toggle('hidden', !masks.length);
+  $('masks').innerHTML = masks.map(m=>`<figure><img src="${m.u}" alt="${NAMES[m.k]} map" loading="lazy"><figcaption>${NAMES[m.k]}</figcaption></figure>`).join('');
+  $('demoNote').classList.toggle('hidden', !j.demo);
+}
+function avg(j){ const v=Object.values(j.scores).map(s=>s.ui); return v.reduce((a,b)=>a+b,0)/v.length; }
+$('toIrritant').onclick=()=>showTab('irritant');
+
+/* ---------------- Irritant Watch ---------------- */
+// tags: sens = irritation/allergy/redness, dry = stripping/dehydrating, acne = pore-clogging
+// s = base severity 1 (mild) .. 3 (strong)
+const DB = [
+ {n:'Fragrance / Parfum', k:['fragrance','parfum'], t:['sens'], s:3, w:'A hidden blend of many volatile chemicals. One of the most common causes of contact allergy and flare-ups on reactive skin.'},
+ {n:'Fragrance allergens (limonene, linalool, citral, geraniol...)', k:['limonene','linalool','citral','geraniol','citronellol','eugenol','cinnamal','hexyl cinnamal','benzyl salicylate','benzyl benzoate','coumarin','isoeugenol','farnesol','amyl cinnamal','hydroxycitronellal'], t:['sens'], s:2, w:'Scent molecules that oxidise in air into stronger allergens. They are among the 26 fragrance allergens that EU rules require to be listed by name.'},
+ {n:'Essential oils', k:['lavandula','lavender','mentha','peppermint','melaleuca','tea tree','citrus','orange','bergamot','lemon','eucalyptus','ylang','rosmarinus','rosemary','cinnamomum','clove','jasminum','rosa damascena','geranium','thymus','citrus aurantium'], t:['sens'], s:3, w:'Concentrated plant extracts packed with terpenes that can sting, sensitise skin and cause photo-irritation (especially citrus oils).'},
+ {n:'Menthol / camphor', k:['menthol','camphor'], t:['sens'], s:2, w:'Create a cooling sensation by activating nerve receptors, which is a mild irritation signal. Can worsen redness.'},
+ {n:'Denatured alcohol / isopropyl alcohol', k:['alcohol denat','denatured alcohol','sd alcohol','isopropyl alcohol','ethanol'], t:['dry','sens'], s:2, w:'Small, fast-evaporating alcohols that dissolve skin lipids and weaken the moisture barrier. (Fatty alcohols like cetyl or stearyl alcohol are different and are gentle.)'},
+ {n:'Sodium lauryl sulfate (SLS)', k:['sodium lauryl sulfate','ammonium lauryl sulfate','sodium lauryl sulphate'], t:['dry','sens'], s:3, w:'A strong surfactant that strips oils and proteins from the skin surface. It is used as a reference irritant in skin research.'},
+ {n:'Sodium laureth sulfate (SLES)', k:['sodium laureth sulfate','sodium laureth sulphate','ammonium laureth sulfate'], t:['dry','sens'], s:2, w:'Milder than SLS but still a strong cleanser that can leave dry or sensitive skin tight.'},
+ {n:'Soap (saponified oils)', k:['sodium cocoate','sodium palmate','sodium tallowate','sodium palm kernelate','sodium olivate'], t:['dry','sens'], s:2, w:'True soaps are alkaline (pH 9-10) while skin sits near pH 5. That shift disrupts the acid mantle and the barrier.'},
+ {n:'Retinoids (retinol, retinal, tretinoin, adapalene)', k:['retinol','retinal','tretinoin','adapalene','retinaldehyde'], t:['sens','dry'], s:2, w:'Speed up cell turnover. Effective for ageing and acne, but peeling, dryness and redness are common, especially when you start.'},
+ {n:'Retinyl palmitate / retinyl acetate', k:['retinyl palmitate','retinyl acetate'], t:['sens'], s:1, w:'A gentler, weaker retinoid ester. Less irritating, but still worth introducing slowly.'},
+ {n:'Glycolic acid (AHA)', k:['glycolic acid'], t:['sens','dry'], s:2, w:'The smallest AHA, so it penetrates deeply. Great exfoliant, but can cause stinging and redness on sensitive skin.'},
+ {n:'Lactic / mandelic acid (AHA)', k:['lactic acid','mandelic acid'], t:['sens'], s:1, w:'Gentler AHAs that also attract water, but still exfoliate and can sting on reactive skin.'},
+ {n:'Salicylic acid (BHA)', k:['salicylic acid'], t:['dry','sens'], s:2, w:'Oil-soluble, so it clears pores well (a plus for acne), but can dry and irritate if overused or if skin is already dehydrated.'},
+ {n:'Benzoyl peroxide', k:['benzoyl peroxide'], t:['dry','sens'], s:3, w:'Releases oxygen radicals that kill acne bacteria, and also dries and irritates skin. Bleaches fabrics, too.'},
+ {n:'Isothiazolinone preservatives (MI / MCI)', k:['methylisothiazolinone','methylchloroisothiazolinone','benzisothiazolinone','octylisothiazolinone'], t:['sens'], s:3, w:'Very effective preservatives that are also well-known contact allergens, which is why they are restricted in leave-on products in the EU.'},
+ {n:'Formaldehyde releasers', k:['dmdm hydantoin','imidazolidinyl urea','diazolidinyl urea','quaternium-15','bronopol','2-bromo-2-nitropropane'], t:['sens'], s:3, w:'Preservatives that slowly release tiny amounts of formaldehyde, a known skin sensitiser.'},
+ {n:'Witch hazel', k:['hamamelis','witch hazel'], t:['dry','sens'], s:2, w:'Rich in tannins (astringent) and often sold in an alcohol base, so it tightens and dries the skin surface.'},
+ {n:'Propylene glycol', k:['propylene glycol'], t:['sens'], s:1, w:'A common humectant, but a known irritant for a minority of people, especially at higher concentrations or on broken skin.'},
+ {n:'Chemical UV filters (oxybenzone, octocrylene)', k:['oxybenzone','benzophenone-3','octocrylene','homosalate','octinoxate','ethylhexyl methoxycinnamate'], t:['sens'], s:2, w:'Absorb UV and turn it into heat. They can sting or trigger allergy, particularly around the eyes.'},
+ {n:'Avobenzone', k:['avobenzone','butyl methoxydibenzoylmethane'], t:['sens'], s:1, w:'Effective UVA filter that can irritate some sensitive skin; mineral filters (zinc oxide) are often better tolerated.'},
+ {n:'Coconut oil', k:['cocos nucifera','coconut oil'], t:['acne'], s:3, w:'Rich in lauric acid and highly comedogenic for many people. It can clog pores on the face.'},
+ {n:'Isopropyl myristate / palmitate', k:['isopropyl myristate','isopropyl palmitate','isopropyl isostearate'], t:['acne'], s:3, w:'Fast-absorbing esters that give a silky feel but are among the classic pore-clogging ingredients in comedogenicity tests.'},
+ {n:'Cocoa butter', k:['theobroma cacao','cocoa butter'], t:['acne'], s:2, w:'A dense, waxy butter that sits on skin and can trap oil in pores of acne-prone faces.'},
+ {n:'Wheat germ oil', k:['triticum vulgare germ oil','wheat germ oil'], t:['acne'], s:2, w:'Rich in oleic acid and moderately comedogenic.'},
+ {n:'Lanolin', k:['lanolin'], t:['sens','acne'], s:2, w:'Wool wax that can sensitise some people and feels heavy on breakout-prone skin.'},
+ {n:'Algae / seaweed extracts', k:['algae extract','laminaria','spirulina','chlorella','fucus'], t:['acne'], s:1, w:'Often iodine-rich or carrageenan-based, and linked to breakouts in some acne-prone people.'},
+ {n:'L-ascorbic acid (pure vitamin C)', k:['ascorbic acid','l-ascorbic'], t:['sens'], s:2, w:'Needs a low pH (about 3.5) to work, and that acidity stings on a damaged barrier. Gentler derivatives exist (e.g. ascorbyl glucoside).'},
+ {n:'Kojic acid', k:['kojic acid'], t:['sens'], s:2, w:'A tyrosinase inhibitor for dark spots that is a fairly common contact sensitiser.'},
+ {n:'Hydroquinone', k:['hydroquinone'], t:['sens'], s:3, w:'A strong skin-lightening agent that can irritate and has usage limits or prescription requirements in many countries.'},
+ {n:'Sulfur', k:['sulfur','sulphur'], t:['dry'], s:2, w:'Keratolytic and antibacterial for acne, but notably drying.'},
+ {n:'Benzyl alcohol', k:['benzyl alcohol'], t:['sens'], s:1, w:'Preservative and solvent. Generally mild, but it is a recognised allergen for a small group.'}
+];
+
+const profile = {sens:false, dry:false, acne:false};
+const chipEls = [...document.querySelectorAll('#chips .chip')];
+function paintChips(){ chipEls.forEach(c=>c.classList.toggle('on', profile[c.dataset.p])); }
+chipEls.forEach(c=>c.onclick=()=>{ profile[c.dataset.p]=!profile[c.dataset.p]; $('profSrc').textContent='(edited by you)'; paintChips(); });
+
+function applyProfileFromScan(j){
+  const s=(k)=>j.scores[k]?.ui;
+  // Scores are "higher = healthier"; below 75 we treat that area as a weak spot.
+  profile.sens = s('redness')!==undefined && s('redness')<75;
+  profile.dry  = s('moisture')!==undefined && s('moisture')<75;
+  profile.acne = (s('acne')!==undefined && s('acne')<75) || (s('oiliness')!==undefined && s('oiliness')<65) || (s('pore')!==undefined && s('pore')<65);
+  $('profSrc').textContent='(set from your scan, you can change it)';
+  paintChips();
+}
+try{ const saved=JSON.parse(localStorage.getItem('glowchem_scan')||'null'); if(saved){ applyProfileFromScan(saved); renderScan(saved); } }catch(e){}
+
+const SAMPLE = 'Aqua, Alcohol Denat., Glycerin, Sodium Laureth Sulfate, Parfum, Limonene, Linalool, Cocos Nucifera (Coconut) Oil, Retinol, Isopropyl Myristate, Phenoxyethanol, Methylisothiazolinone, Tocopherol';
+
+$('sampleBtn').onclick=()=>{ $('inci').value=SAMPLE; check(); };
+$('checkBtn').onclick=check;
+
+function esc(s){ return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+function check(){
+  const raw=$('inci').value.trim();
+  const out=$('irrOut');
+  if(!raw){ out.innerHTML='<div class="err">Paste an ingredient list first.</div>'; return; }
+  const items = raw.replace(/^\s*ingredients?\s*:/i,'').split(/[,;\n•]+/).map(x=>x.trim()).filter(Boolean);
+  const anyProfile = profile.sens||profile.dry||profile.acne;
+  const hits=[];
+  DB.forEach(d=>{
+    let idx=-1, matched='';
+    for(let i=0;i<items.length && idx<0;i++){
+      const low=items[i].toLowerCase();
+      if(d.k.some(k=>low.includes(k))){ idx=i; matched=items[i]; }
+    }
+    if(idx<0) return;
+    const pos = idx<5?1.3 : idx<10?1 : 0.7;
+    const relevant = d.t.filter(t=>profile[t]);
+    const mult = !anyProfile ? 1 : relevant.length ? 1.6 : 0.7;
+    const score = d.s*pos*mult;
+    const lvl = score>=4?'avoid':score>=2.2?'caution':'low';
+    hits.push({d,idx,matched,relevant,score,lvl});
+  });
+  hits.sort((a,b)=>b.score-a.score);
+
+  const nAvoid=hits.filter(h=>h.lvl==='avoid').length, nCaut=hits.filter(h=>h.lvl==='caution').length;
+  let vCls,vTxt,vSub;
+  if(nAvoid){ vCls='bad'; vTxt='Not recommended for you'; vSub=nAvoid+' ingredient'+(nAvoid>1?'s':'')+' clash strongly with '+(anyProfile?'your skin profile.':'most skin types.'); }
+  else if(nCaut){ vCls='warn'; vTxt='Use with caution'; vSub='Patch-test first and introduce it slowly.'; }
+  else { vCls='good'; vTxt='Looks gentle'; vSub=anyProfile?'No major clashes with your skin profile found.':'No major irritants found.'; }
+
+  const TAGN={sens:'sensitive skin',dry:'dry skin',acne:'acne-prone skin'};
+  out.innerHTML = `<div class="verdict ${vCls}">${vTxt}<small>${vSub} Checked ${items.length} ingredients.</small></div>` +
+    (hits.length ? hits.map(h=>{
+      const lab = h.lvl==='avoid'?'Avoid':h.lvl==='caution'?'Caution':'Minor';
+      const you = !anyProfile ? '' : h.relevant.length
+        ? `<div class="you" style="color:var(--bad)">Relevant to you: matters for ${h.relevant.map(t=>TAGN[t]).join(' and ')}.</div>`
+        : `<div class="you" style="color:var(--muted)">Less relevant to your current skin profile.</div>`;
+      const early = h.idx<5 ? ' &middot; listed early, so likely at a higher concentration' : '';
+      return `<div class="ing ${h.lvl}"><b>${esc(h.d.n)}</b> <span class="lbl ${h.lvl==='avoid'?'bad':h.lvl==='caution'?'warn':'good'}">${lab}</span>
+        <div class="mini">Found as "${esc(h.matched)}" &middot; position ${h.idx+1}${early}</div>
+        <div class="why">${esc(h.d.w)}</div>${you}</div>`;
+    }).join('') : '<p>Nothing in our irritant list was found in this product.</p>') +
+    '<p class="mini">Ingredients are listed from highest to lowest concentration, so earlier flags count more. This is general guidance, not medical advice. Patch-test new products.</p>';
+}
+
+/* ---------------- demo / health ---------------- */
+fetch('/api/health').then(r=>r.json()).then(h=>{
+  if(h.demo) $('demoNote').classList.remove('hidden');
+  if(!h.demo && !h.hasKey) showErr('Server has no YouCam API key yet. Add it to the .env file and restart.');
+}).catch(()=>{});
+</script>
+</body>
+</html>

@@ -1,0 +1,4 @@
+YOUCAM_API_KEY=
+PORT=3000
+# Optional: set to true to try the interface without using any API units (sample data, clearly labelled)
+DEMO_MODE=false
